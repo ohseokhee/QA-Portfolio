@@ -17,6 +17,7 @@ try:
     print("1. 브라우저 경고창 발생")
     time.sleep(2)
 
+
     # 3. [핵심] 경고창으로 제어권 이동 및 확인 클릭
     # alert_is_present 조건으로 경고창이 뜰 때까지 대기
     wait = WebDriverWait(driver, 10)
