@@ -1,5 +1,5 @@
 # [Day 3] 조건문을 활용한 데이터 판별 실습
-user_level = 15
+user_level = 25
 required_level = 20
 
 print("--- 콘텐츠 입장 조건 검토 ---")
