@@ -211,6 +211,9 @@ AWS_AccessKeyID_SecretAccessKey.txt
 *.pem
 .aws/
 
+# MCP secrets (Notion API key etc.)
+.mcp.json
+
 # Allure generated artifacts
 allure-results/
 allure-report/
