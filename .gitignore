@@ -205,3 +205,12 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+# AWS credentials
+AWS_AccessKeyID_SecretAccessKey.txt
+*.pem
+.aws/
+
+# Allure generated artifacts
+allure-results/
+allure-report/

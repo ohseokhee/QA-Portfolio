@@ -1,0 +1,6 @@
+selenium
+pytest
+pymysql
+allure-pytest
+boto3
+
