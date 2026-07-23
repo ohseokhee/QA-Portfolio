@@ -1,0 +1,167 @@
+{
+  "info": {
+    "name": "Day57 JSONPlaceholder API with Tests",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "GET 전체 게시글 목록",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('상태 코드 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('응답이 배열 형태', function () {",
+              "    pm.expect(pm.response.json()).to.be.an('array');",
+              "});",
+              "",
+              "pm.test('응답 시간 2000ms 미만', function () {",
+              "    pm.expect(pm.response.responseTime).to.be.below(2000);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{base_url}}/posts",
+          "host": ["{{base_url}}"],
+          "path": ["posts"]
+        }
+      }
+    },
+    {
+      "name": "GET 단일 게시글 조회 (데이터 주도)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('상태 코드 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('응답 id가 요청한 post_id와 일치', function () {",
+              "    const body = pm.response.json();",
+              "    pm.expect(String(body.id)).to.eql(String(pm.variables.get('post_id')));",
+              "});",
+              "",
+              "pm.test('응답에 title 필드 존재', function () {",
+              "    pm.expect(pm.response.json()).to.have.property('title');",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{base_url}}/posts/{{post_id}}",
+          "host": ["{{base_url}}"],
+          "path": ["posts", "{{post_id}}"]
+        }
+      }
+    },
+    {
+      "name": "POST 게시글 생성",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('상태 코드 201', function () {",
+              "    pm.response.to.have.status(201);",
+              "});",
+              "",
+              "pm.test('생성된 게시글에 id 부여됨', function () {",
+              "    pm.expect(pm.response.json()).to.have.property('id');",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"QA Portfolio Day57\",\n  \"body\": \"Chai assertion 검증 실습\",\n  \"userId\": 1\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/posts",
+          "host": ["{{base_url}}"],
+          "path": ["posts"]
+        }
+      }
+    },
+    {
+      "name": "PUT 게시글 수정",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('상태 코드 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('수정된 title이 응답에 반영됨', function () {",
+              "    pm.expect(pm.response.json().title).to.eql('QA Portfolio Day57 수정');",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "PUT",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"id\": {{post_id}},\n  \"title\": \"QA Portfolio Day57 수정\",\n  \"body\": \"환경변수 활용 수정 요청\",\n  \"userId\": 1\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/posts/{{post_id}}",
+          "host": ["{{base_url}}"],
+          "path": ["posts", "{{post_id}}"]
+        }
+      }
+    },
+    {
+      "name": "DELETE 게시글 삭제",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('상태 코드 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "url": {
+          "raw": "{{base_url}}/posts/{{post_id}}",
+          "host": ["{{base_url}}"],
+          "path": ["posts", "{{post_id}}"]
+        }
+      }
+    }
+  ]
+}
