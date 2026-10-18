@@ -1,0 +1,18 @@
+{
+  "name": "Day61 모의 게임 서버 로컬",
+  "values": [
+    { "key": "base_url", "value": "http://127.0.0.1:8000", "enabled": true },
+    { "key": "max_response_ms", "value": "1000", "enabled": true },
+    { "key": "user1_username", "value": "qa_user1", "enabled": true },
+    { "key": "user1_password", "value": "Test1234!", "enabled": true },
+    { "key": "user2_username", "value": "qa_user2", "enabled": true },
+    { "key": "user2_password", "value": "Test1234!", "enabled": true },
+    { "key": "admin_username", "value": "qa_admin", "enabled": true },
+    { "key": "admin_password", "value": "Admin1234!", "enabled": true },
+    { "key": "user1_token", "value": "", "enabled": true },
+    { "key": "user1_account_id", "value": "", "enabled": true },
+    { "key": "user2_token", "value": "", "enabled": true },
+    { "key": "user2_account_id", "value": "", "enabled": true },
+    { "key": "admin_token", "value": "", "enabled": true }
+  ]
+}

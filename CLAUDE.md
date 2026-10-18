@@ -1,8 +1,8 @@
 # QA-Portfolio 프로젝트 규칙
 
 ## 커리큘럼 현황
-- 완료: Day 1~60
-- 다음: Day 61 (Postman 정상 흐름 컬렉션)
+- 완료: Day 1~61
+- 다음: Day 62 (부정 케이스, 데이터 주도 테스트)
 - 커리큘럼 파일: `curriculum_v3_day59_85.md` (이 파일만 참조)
 - `archive/` 폴더는 지난 커리큘럼 보관용. 읽거나 참조하지 말 것
 - 최초 1회: 루트에 `curriculum_v2_day51_75.md`가 있으면 `git mv`로 `archive/`에 옮기고 Day 59 커밋에 포함

@@ -1,0 +1,527 @@
+{
+  "info": {
+    "name": "Day61 모의 게임 서버 정상 흐름",
+    "description": "day59_api_spec.md 4.3의 실행 Day 61 TC 8건. 로그인 응답의 토큰을 환경 변수에 저장해 다음 요청에 사용 (요청 체이닝)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "event": [
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "pm.test('[공통] 응답 시간 ' + pm.environment.get('max_response_ms') + 'ms 미만', function () {",
+          "    pm.expect(pm.response.responseTime).to.be.below(Number(pm.environment.get('max_response_ms')));",
+          "});",
+          "",
+          "pm.test('[공통] Content-Type JSON', function () {",
+          "    pm.expect(pm.response.headers.get('Content-Type')).to.include('application/json');",
+          "});"
+        ]
+      }
+    }
+  ],
+  "item": [
+    {
+      "name": "TC-AUTH-01 로그인 qa_user1",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const body = pm.response.json();",
+              "",
+              "pm.test('상태 코드 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('응답 필드 4개 존재', function () {",
+              "    pm.expect(body).to.have.all.keys('access_token', 'token_type', 'expires_in', 'account_id');",
+              "});",
+              "",
+              "pm.test('access_token은 64자리 hex', function () {",
+              "    pm.expect(body.access_token).to.match(/^[0-9a-f]{64}$/);",
+              "});",
+              "",
+              "pm.test('token_type Bearer, expires_in 1800', function () {",
+              "    pm.expect(body.token_type).to.eql('Bearer');",
+              "    pm.expect(body.expires_in).to.eql(1800);",
+              "});",
+              "",
+              "pm.test('account_id 1 (시드 계정)', function () {",
+              "    pm.expect(body.account_id).to.eql(1);",
+              "});",
+              "",
+              "pm.environment.set('user1_token', body.access_token);",
+              "pm.environment.set('user1_account_id', body.account_id);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{ \"username\": \"{{user1_username}}\", \"password\": \"{{user1_password}}\" }" },
+        "url": "{{base_url}}/auth/login"
+      }
+    },
+    {
+      "name": "준비: 로그인 qa_admin",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const body = pm.response.json();",
+              "pm.test('상태 코드 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "pm.environment.set('admin_token', body.access_token);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{ \"username\": \"{{admin_username}}\", \"password\": \"{{admin_password}}\" }" },
+        "url": "{{base_url}}/auth/login"
+      }
+    },
+    {
+      "name": "준비: 로그인 qa_user2",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const body = pm.response.json();",
+              "pm.test('상태 코드 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "pm.environment.set('user2_token', body.access_token);",
+              "pm.environment.set('user2_account_id', body.account_id);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{ \"username\": \"{{user2_username}}\", \"password\": \"{{user2_password}}\" }" },
+        "url": "{{base_url}}/auth/login"
+      }
+    },
+    {
+      "name": "TC-CUR-01 재화 조회 (본인)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const body = pm.response.json();",
+              "",
+              "pm.test('상태 코드 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('account_id가 토큰의 계정과 일치', function () {",
+              "    pm.expect(body.account_id).to.eql(Number(pm.environment.get('user1_account_id')));",
+              "});",
+              "",
+              "pm.test('balances에 FC·BP 키 모두 존재', function () {",
+              "    pm.expect(body.balances).to.have.all.keys('FC', 'BP');",
+              "});",
+              "",
+              "pm.test('잔액은 0 이상 99,999,999 이하 정수 (R1)', function () {",
+              "    ['FC', 'BP'].forEach(function (c) {",
+              "        pm.expect(Number.isInteger(body.balances[c]), c + ' 정수').to.be.true;",
+              "        pm.expect(body.balances[c]).to.be.within(0, 99999999);",
+              "    });",
+              "});",
+              "",
+              "pm.environment.set('user1_fc_before', body.balances.FC);",
+              "pm.environment.set('user1_bp_before', body.balances.BP);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{user1_token}}" }],
+        "url": "{{base_url}}/accounts/{{user1_account_id}}/currency"
+      }
+    },
+    {
+      "name": "TC-CUR-02 재화 조회 (ADMIN이 타인 계정)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const body = pm.response.json();",
+              "",
+              "pm.test('상태 코드 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('조회 대상 계정(qa_user1)의 잔액 반환', function () {",
+              "    pm.expect(body.account_id).to.eql(Number(pm.environment.get('user1_account_id')));",
+              "    pm.expect(body.balances.FC).to.eql(Number(pm.environment.get('user1_fc_before')));",
+              "    pm.expect(body.balances.BP).to.eql(Number(pm.environment.get('user1_bp_before')));",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{admin_token}}" }],
+        "url": "{{base_url}}/accounts/{{user1_account_id}}/currency"
+      }
+    },
+    {
+      "name": "준비: 지급 전 qa_user2 잔액 조회 (ADMIN)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const body = pm.response.json();",
+              "pm.test('상태 코드 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "pm.environment.set('user2_fc_before', body.balances.FC);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{admin_token}}" }],
+        "url": "{{base_url}}/accounts/{{user2_account_id}}/currency"
+      }
+    },
+    {
+      "name": "TC-GRANT-01 재화 지급 (ADMIN, FC 5000)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const body = pm.response.json();",
+              "const before = Number(pm.environment.get('user2_fc_before'));",
+              "",
+              "pm.test('상태 코드 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('응답 필드 5개 존재, tx_id 양의 정수', function () {",
+              "    pm.expect(body).to.have.all.keys('tx_id', 'account_id', 'currency_type', 'amount', 'balance_after');",
+              "    pm.expect(Number.isInteger(body.tx_id) && body.tx_id > 0).to.be.true;",
+              "});",
+              "",
+              "pm.test('요청 값 그대로 반환 (account_id, FC, 5000)', function () {",
+              "    pm.expect(body.account_id).to.eql(Number(pm.environment.get('user2_account_id')));",
+              "    pm.expect(body.currency_type).to.eql('FC');",
+              "    pm.expect(body.amount).to.eql(5000);",
+              "});",
+              "",
+              "pm.test('balance_after = 지급 전 잔액 + 5000', function () {",
+              "    pm.expect(body.balance_after).to.eql(before + 5000);",
+              "});",
+              "",
+              "pm.environment.set('user2_fc_after_grant', body.balance_after);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{admin_token}}" }
+        ],
+        "body": { "mode": "raw", "raw": "{ \"account_id\": {{user2_account_id}}, \"currency_type\": \"FC\", \"amount\": 5000, \"memo\": \"Day61 정상 흐름 지급\" }" },
+        "url": "{{base_url}}/admin/currency/grant"
+      }
+    },
+    {
+      "name": "TC-GRANT-01 확인: 지급 후 qa_user2 잔액 재조회",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const body = pm.response.json();",
+              "pm.test('상태 코드 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "pm.test('조회 잔액 = 지급 응답의 balance_after', function () {",
+              "    pm.expect(body.balances.FC).to.eql(Number(pm.environment.get('user2_fc_after_grant')));",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{user2_token}}" }],
+        "url": "{{base_url}}/accounts/{{user2_account_id}}/currency"
+      }
+    },
+    {
+      "name": "준비: 구매 전 qa_user1 인벤토리 조회",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const body = pm.response.json();",
+              "pm.test('상태 코드 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "const qty = function (id) {",
+              "    const found = body.items.find(function (i) { return i.item_id === id; });",
+              "    return found ? found.quantity : 0;",
+              "};",
+              "pm.environment.set('user1_inv101_before', qty(101));",
+              "pm.environment.set('user1_inv103_before', qty(103));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{user1_token}}" }],
+        "url": "{{base_url}}/accounts/{{user1_account_id}}/inventory"
+      }
+    },
+    {
+      "name": "TC-SHOP-01 구매 101 x 2 (FC)",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.environment.set('request_id_shop01', 'day61-shop01-' + Date.now());"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const body = pm.response.json();",
+              "const fcBefore = Number(pm.environment.get('user1_fc_before'));",
+              "const invBefore = Number(pm.environment.get('user1_inv101_before'));",
+              "",
+              "pm.test('상태 코드 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('응답 필드 8개 존재', function () {",
+              "    pm.expect(body).to.have.all.keys('purchase_id', 'item_id', 'quantity', 'unit_price',",
+              "        'total_price', 'currency_type', 'balance_after', 'inventory_quantity');",
+              "});",
+              "",
+              "pm.test('item 101, 수량 2, 단가 1000, FC', function () {",
+              "    pm.expect(body.item_id).to.eql(101);",
+              "    pm.expect(body.quantity).to.eql(2);",
+              "    pm.expect(body.unit_price).to.eql(1000);",
+              "    pm.expect(body.currency_type).to.eql('FC');",
+              "});",
+              "",
+              "pm.test('total_price = 단가 x 수량 = 2000 (R5)', function () {",
+              "    pm.expect(body.total_price).to.eql(body.unit_price * body.quantity);",
+              "    pm.expect(body.total_price).to.eql(2000);",
+              "});",
+              "",
+              "pm.test('balance_after = 구매 전 FC - 2000', function () {",
+              "    pm.expect(body.balance_after).to.eql(fcBefore - 2000);",
+              "});",
+              "",
+              "pm.test('inventory_quantity = 구매 전 보유 + 2', function () {",
+              "    pm.expect(body.inventory_quantity).to.eql(invBefore + 2);",
+              "});",
+              "",
+              "pm.environment.set('user1_fc_after_shop01', body.balance_after);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{user1_token}}" }
+        ],
+        "body": { "mode": "raw", "raw": "{ \"item_id\": 101, \"quantity\": 2, \"request_id\": \"{{request_id_shop01}}\" }" },
+        "url": "{{base_url}}/shop/purchase"
+      }
+    },
+    {
+      "name": "TC-SHOP-02 구매 103 x 1 (BP)",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.environment.set('request_id_shop02', 'day61-shop02-' + Date.now());"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const body = pm.response.json();",
+              "const bpBefore = Number(pm.environment.get('user1_bp_before'));",
+              "",
+              "pm.test('상태 코드 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('item 103, 수량 1, 단가 10000, BP', function () {",
+              "    pm.expect(body.item_id).to.eql(103);",
+              "    pm.expect(body.quantity).to.eql(1);",
+              "    pm.expect(body.unit_price).to.eql(10000);",
+              "    pm.expect(body.currency_type).to.eql('BP');",
+              "});",
+              "",
+              "pm.test('balance_after = 구매 전 BP - 10000', function () {",
+              "    pm.expect(body.balance_after).to.eql(bpBefore - 10000);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{user1_token}}" }
+        ],
+        "body": { "mode": "raw", "raw": "{ \"item_id\": 103, \"quantity\": 1, \"request_id\": \"{{request_id_shop02}}\" }" },
+        "url": "{{base_url}}/shop/purchase"
+      }
+    },
+    {
+      "name": "TC-SHOP-01·02 확인: 구매 후 재화 재조회",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const body = pm.response.json();",
+              "",
+              "pm.test('상태 코드 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('FC는 101 구매분(2000)만 차감, BP 구매로 변화 없음', function () {",
+              "    pm.expect(body.balances.FC).to.eql(Number(pm.environment.get('user1_fc_after_shop01')));",
+              "    pm.expect(body.balances.FC).to.eql(Number(pm.environment.get('user1_fc_before')) - 2000);",
+              "});",
+              "",
+              "pm.test('BP는 103 구매분(10000)만 차감', function () {",
+              "    pm.expect(body.balances.BP).to.eql(Number(pm.environment.get('user1_bp_before')) - 10000);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{user1_token}}" }],
+        "url": "{{base_url}}/accounts/{{user1_account_id}}/currency"
+      }
+    },
+    {
+      "name": "TC-INV-01 인벤토리 조회 (구매 후 본인)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const body = pm.response.json();",
+              "const qty = function (id) {",
+              "    const found = body.items.find(function (i) { return i.item_id === id; });",
+              "    return found ? found.quantity : 0;",
+              "};",
+              "",
+              "pm.test('상태 코드 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('항목마다 item_id·name·quantity 존재', function () {",
+              "    body.items.forEach(function (i) {",
+              "        pm.expect(i).to.have.all.keys('item_id', 'name', 'quantity');",
+              "    });",
+              "});",
+              "",
+              "pm.test('101 수량 = 구매 전 + 2, 103 수량 = 구매 전 + 1', function () {",
+              "    pm.expect(qty(101)).to.eql(Number(pm.environment.get('user1_inv101_before')) + 2);",
+              "    pm.expect(qty(103)).to.eql(Number(pm.environment.get('user1_inv103_before')) + 1);",
+              "});",
+              "",
+              "pm.test('수량 0 항목 없음, item_id 오름차순', function () {",
+              "    const ids = body.items.map(function (i) { return i.item_id; });",
+              "    pm.expect(body.items.every(function (i) { return i.quantity > 0; })).to.be.true;",
+              "    pm.expect(ids).to.eql(ids.slice().sort(function (a, b) { return a - b; }));",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{user1_token}}" }],
+        "url": "{{base_url}}/accounts/{{user1_account_id}}/inventory"
+      }
+    },
+    {
+      "name": "TC-INV-02 인벤토리 조회 (구매 이력 없는 계정)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const body = pm.response.json();",
+              "",
+              "pm.test('상태 코드 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('account_id 일치, items 빈 배열', function () {",
+              "    pm.expect(body.account_id).to.eql(Number(pm.environment.get('user2_account_id')));",
+              "    pm.expect(body.items).to.be.an('array').that.is.empty;",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{user2_token}}" }],
+        "url": "{{base_url}}/accounts/{{user2_account_id}}/inventory"
+      }
+    }
+  ]
+}
