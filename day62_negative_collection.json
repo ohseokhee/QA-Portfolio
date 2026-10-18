@@ -1,0 +1,339 @@
+{
+  "info": {
+    "name": "Day62 모의 게임 서버 부정 케이스",
+    "description": "day59_api_spec.md 4.3의 실행 Day 62 TC를 day62_negative_cases.csv 한 행 = 1 iteration으로 반복 실행 (데이터 주도 테스트). 요청 절차는 하나, 입력값·기대값은 CSV에서 바꿈",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "event": [
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "pm.test('[공통] 응답 시간 ' + pm.environment.get('max_response_ms') + 'ms 미만', function () {",
+          "    pm.expect(pm.response.responseTime).to.be.below(Number(pm.environment.get('max_response_ms')));",
+          "});",
+          "",
+          "pm.test('[공통] Content-Type JSON', function () {",
+          "    pm.expect(pm.response.headers.get('Content-Type')).to.include('application/json');",
+          "});"
+        ]
+      }
+    }
+  ],
+  "item": [
+    {
+      "name": "준비: 로그인 qa_admin (1회차만)",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "if (pm.info.iteration > 0) {",
+              "    pm.execution.skipRequest();",
+              "}"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const body = pm.response.json();",
+              "pm.test('상태 코드 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "pm.environment.set('admin_token', body.access_token);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{ \"username\": \"{{admin_username}}\", \"password\": \"{{admin_password}}\" }" },
+        "url": "{{base_url}}/auth/login"
+      }
+    },
+    {
+      "name": "준비: 로그인 qa_user1 (1회차만)",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "if (pm.info.iteration > 0) {",
+              "    pm.execution.skipRequest();",
+              "}"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const body = pm.response.json();",
+              "pm.test('상태 코드 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "pm.environment.set('user1_token', body.access_token);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{ \"username\": \"{{user1_username}}\", \"password\": \"{{user1_password}}\" }" },
+        "url": "{{base_url}}/auth/login"
+      }
+    },
+    {
+      "name": "준비: 로그인 qa_user2 (1회차만)",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "if (pm.info.iteration > 0) {",
+              "    pm.execution.skipRequest();",
+              "}"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const body = pm.response.json();",
+              "pm.test('상태 코드 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "pm.environment.set('user2_token', body.access_token);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{ \"username\": \"{{user2_username}}\", \"password\": \"{{user2_password}}\" }" },
+        "url": "{{base_url}}/auth/login"
+      }
+    },
+    {
+      "name": "준비: 상태 세팅 (ADMIN 지급, setup_grant 있는 행만)",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "if (!pm.iterationData.get('setup_grant')) {",
+              "    pm.execution.skipRequest();",
+              "}"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(pm.iterationData.get('tc_id') + ' 준비 지급 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{admin_token}}" }
+        ],
+        "body": { "mode": "raw", "raw": "{{setup_grant}}" },
+        "url": "{{base_url}}/admin/currency/grant"
+      }
+    },
+    {
+      "name": "준비: 사전 잔액 조회 (check_account 있는 행만)",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "if (!pm.iterationData.get('check_account')) {",
+              "    pm.execution.skipRequest();",
+              "}"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const body = pm.response.json();",
+              "pm.test('상태 코드 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "pm.environment.set('pre_fc', body.balances.FC);",
+              "pm.environment.set('pre_bp', body.balances.BP);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{admin_token}}" }],
+        "url": "{{base_url}}/accounts/{{check_account}}/currency"
+      }
+    },
+    {
+      "name": "케이스 실행",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const d = pm.iterationData;",
+              "const tokens = {",
+              "    admin: pm.environment.get('admin_token'),",
+              "    user1: pm.environment.get('user1_token'),",
+              "    user2: pm.environment.get('user2_token'),",
+              "    expired: pm.environment.get('expired_token'),",
+              "    expiring: pm.environment.get('expiring_token'),",
+              "    random: 'not-a-real-token-0000'",
+              "};",
+              "",
+              "// CSV의 method로 요청 방식 변경",
+              "pm.request.method = d.get('method');",
+              "",
+              "// CSV의 auth로 토큰 선택 (none이면 헤더 없이 전송)",
+              "pm.request.headers.remove('Authorization');",
+              "if (d.get('auth') !== 'none') {",
+              "    pm.request.headers.add({ key: 'Authorization', value: 'Bearer ' + tokens[d.get('auth')] });",
+              "}",
+              "",
+              "// 실행마다 새 request_id 접두어 → 재실행해도 멱등성 키 중복 없음",
+              "if (pm.info.iteration === 0 || !pm.environment.get('run_id')) {",
+              "    pm.environment.set('run_id', 'd62-' + Date.now());",
+              "}",
+              "const runId = pm.environment.get('run_id');",
+              "const rid = runId + '-' + pm.info.iteration;",
+              "const body = (d.get('body') || '')",
+              "    .replace('{{run_id}}', runId)",
+              "    .replace('{{rid64}}', rid.padEnd(64, 'x'))",
+              "    .replace('{{rid65}}', rid.padEnd(65, 'x'))",
+              "    .replace('{{rid}}', rid);",
+              "pm.variables.set('case_body', body);"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const d = pm.iterationData;",
+              "const tc = d.get('tc_id') + ' ' + d.get('title');",
+              "const expStatus = Number(d.get('expect_status'));",
+              "const expError = d.get('expect_error');",
+              "let body = {};",
+              "try { body = pm.response.json(); } catch (e) {}",
+              "pm.environment.set('case_status', pm.response.code);",
+              "pm.environment.set('case_response', JSON.stringify(body));",
+              "",
+              "pm.test(tc + ' → 상태 코드 ' + expStatus, function () {",
+              "    pm.response.to.have.status(expStatus);",
+              "});",
+              "",
+              "if (expError) {",
+              "    pm.test(tc + ' → error_code ' + expError, function () {",
+              "        pm.expect(body.error_code).to.eql(expError);",
+              "    });",
+              "    pm.test(tc + ' → 오류 본문에 error_code·message 존재', function () {",
+              "        pm.expect(body).to.include.all.keys('error_code', 'message');",
+              "    });",
+              "}",
+              "",
+              "if (d.get('idem') === 'save') {",
+              "    pm.environment.set('idem_first', JSON.stringify(body));",
+              "}",
+              "if (d.get('idem') === 'compare') {",
+              "    pm.test(tc + ' → 처음 응답과 같은 본문 (같은 purchase_id)', function () {",
+              "        pm.expect(body).to.eql(JSON.parse(pm.environment.get('idem_first')));",
+              "    });",
+              "}"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{{case_body}}" },
+        "url": "{{base_url}}{{path}}"
+      }
+    },
+    {
+      "name": "확인: 사후 잔액 조회 (check_account 있는 행만)",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "if (!pm.iterationData.get('check_account')) {",
+              "    pm.execution.skipRequest();",
+              "}"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const d = pm.iterationData;",
+              "const tc = d.get('tc_id') + ' ' + d.get('title');",
+              "const body = pm.response.json();",
+              "const fcDelta = Number(d.get('fc_delta'));",
+              "const bpDelta = Number(d.get('bp_delta'));",
+              "const caseResponse = JSON.parse(pm.environment.get('case_response'));",
+              "",
+              "pm.test(tc + ' → 계정 ' + d.get('check_account') + ' FC 변동 ' + fcDelta, function () {",
+              "    pm.expect(body.balances.FC - Number(pm.environment.get('pre_fc'))).to.eql(fcDelta);",
+              "});",
+              "",
+              "pm.test(tc + ' → 계정 ' + d.get('check_account') + ' BP 변동 ' + bpDelta, function () {",
+              "    pm.expect(body.balances.BP - Number(pm.environment.get('pre_bp'))).to.eql(bpDelta);",
+              "});",
+              "",
+              "if (Number(pm.environment.get('case_status')) === 200 && caseResponse.balance_after !== undefined) {",
+              "    pm.test(tc + ' → 응답 balance_after = 재조회 ' + caseResponse.currency_type + ' 잔액', function () {",
+              "        pm.expect(caseResponse.balance_after).to.eql(body.balances[caseResponse.currency_type]);",
+              "    });",
+              "}"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{admin_token}}" }],
+        "url": "{{base_url}}/accounts/{{check_account}}/currency"
+      }
+    }
+  ]
+}
