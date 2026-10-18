@@ -4,3 +4,4 @@ pymysql
 allure-pytest
 boto3
 
+python-dotenv

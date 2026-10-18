@@ -217,3 +217,7 @@ AWS_AccessKeyID_SecretAccessKey.txt
 # Allure generated artifacts
 allure-results/
 allure-report/
+
+# Day 59~ 인계 파일, 봉인 결함 목록
+handoff/
+sealed/
