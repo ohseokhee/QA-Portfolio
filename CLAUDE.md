@@ -1,8 +1,8 @@
 # QA-Portfolio 프로젝트 규칙
 
 ## 커리큘럼 현황
-- 완료: Day 1~63
-- 다음: Day 64 (동시 요청과 리포트, 봉인 해제)
+- 완료: Day 1~64
+- 다음: Day 65 (Fiddler 캡처 환경, 수동 작업 포함)
 - 커리큘럼 파일: `curriculum_v3_day59_85.md` (이 파일만 참조)
 - `archive/` 폴더는 지난 커리큘럼 보관용. 읽거나 참조하지 말 것
 - 최초 1회: 루트에 `curriculum_v2_day51_75.md`가 있으면 `git mv`로 `archive/`에 옮기고 Day 59 커밋에 포함
