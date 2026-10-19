@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><title>Day 64 Newman 일괄 실행 리포트</title>
+<style>
+body { font-family: sans-serif; margin: 24px; }
+table { border-collapse: collapse; margin-bottom: 24px; }
+th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; font-size: 14px; }
+th { background: #f0f0f0; }
+.pass { color: #1a7f37; font-weight: bold; }
+.fail { color: #cf222e; font-weight: bold; }
+</style></head><body>
+<h1>모의 게임 서버 API 테스트 일괄 실행 (Newman)</h1>
+<p>생성: 2026-10-19 23:03:05 · 서버: day68_server_v2 (회귀) · 명세: day59_api_spec.md</p>
+<h2>컬렉션별 결과</h2>
+<table><tr><th>컬렉션</th><th>iteration</th><th>요청</th><th>assertion</th><th>실패</th><th>상세 리포트</th></tr><tr><td>Day 61 정상 흐름</td><td>1</td><td>14</td><td>67</td><td class='pass'>0</td><td><a href='day68-report/day61.html'>day61.html</a></td></tr><tr><td>Day 62 부정·경계값 (CSV 데이터 주도)</td><td>54</td><td>138</td><td>543</td><td class='fail'>10</td><td><a href='day68-report/day62.html'>day62.html</a></td></tr></table>
+<h2>실패한 assertion</h2>
+<table><tr><th>컬렉션</th><th>iteration</th><th>요청</th><th>테스트</th><th>메시지</th></tr><tr><td>day62</td><td>2</td><td>케이스 실행</td><td>TC-AUTH-09 만료 1초 후 토큰으로 재화 조회 → 상태 코드 401</td><td>expected response to have status code 401 but got 200</td></tr><tr><td>day62</td><td>2</td><td>케이스 실행</td><td>TC-AUTH-09 만료 1초 후 토큰으로 재화 조회 → error_code TOKEN_EXPIRED</td><td>expected undefined to deeply equal &#x27;TOKEN_EXPIRED&#x27;</td></tr><tr><td>day62</td><td>2</td><td>케이스 실행</td><td>TC-AUTH-09 만료 1초 후 토큰으로 재화 조회 → 오류 본문에 error_code·message 존재</td><td>expected { account_id: 1, balances: { …(2) } } to contain keys &#x27;error_code&#x27;, and &#x27;message&#x27;</td></tr><tr><td>day62</td><td>15</td><td>케이스 실행</td><td>TC-INV-03 qa_user1 토큰으로 계정 2 인벤토리 조회 → 상태 코드 403</td><td>expected response to have status code 403 but got 200</td></tr><tr><td>day62</td><td>15</td><td>케이스 실행</td><td>TC-INV-03 qa_user1 토큰으로 계정 2 인벤토리 조회 → error_code FORBIDDEN</td><td>expected undefined to deeply equal &#x27;FORBIDDEN&#x27;</td></tr><tr><td>day62</td><td>15</td><td>케이스 실행</td><td>TC-INV-03 qa_user1 토큰으로 계정 2 인벤토리 조회 → 오류 본문에 error_code·message 존재</td><td>expected { account_id: 2, items: [] } to contain keys &#x27;error_code&#x27;, and &#x27;message&#x27;</td></tr><tr><td>day62</td><td>30</td><td>케이스 실행</td><td>[공통] Content-Type JSON</td><td>expected &#x27;text/plain; charset=utf-8&#x27; to include &#x27;application/json&#x27;</td></tr><tr><td>day62</td><td>30</td><td>케이스 실행</td><td>TC-GRANT-08 지급 후 잔액 100000000 (상한 초과) → 상태 코드 409</td><td>expected response to have status code 409 but got 500</td></tr><tr><td>day62</td><td>30</td><td>케이스 실행</td><td>TC-GRANT-08 지급 후 잔액 100000000 (상한 초과) → error_code BALANCE_CAP_EXCEEDED</td><td>expected undefined to deeply equal &#x27;BALANCE_CAP_EXCEEDED&#x27;</td></tr><tr><td>day62</td><td>30</td><td>케이스 실행</td><td>TC-GRANT-08 지급 후 잔액 100000000 (상한 초과) → 오류 본문에 error_code·message 존재</td><td>expected {} to contain keys &#x27;error_code&#x27;, and &#x27;message&#x27;</td></tr></table>
+</body></html>
