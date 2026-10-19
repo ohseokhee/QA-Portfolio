@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>모의 게임 상점</title>
+<style>
+  body { font-family: sans-serif; margin: 0; padding: 12px; background: #f4f5f7; color: #222; }
+  h1 { font-size: 20px; margin: 4px 0 12px; }
+  section { background: #fff; border-radius: 8px; padding: 12px; margin-bottom: 12px; }
+  h2 { font-size: 16px; margin: 0 0 8px; }
+  input, button { font-size: 15px; padding: 6px 8px; margin: 2px 0; }
+  input { width: 100%; box-sizing: border-box; }
+  button { cursor: pointer; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th, td { border-bottom: 1px solid #ddd; padding: 6px 4px; text-align: left; }
+  #status { font-size: 14px; }
+  #log { font-family: monospace; font-size: 12px; white-space: pre-wrap; max-height: 260px; overflow-y: auto; background: #1e1e1e; color: #d4d4d4; padding: 8px; border-radius: 4px; }
+</style>
+</head>
+<body>
+<h1>모의 게임 상점 (Day 65)</h1>
+
+<section>
+  <h2>로그인</h2>
+  <input id="username" value="qa_user1" placeholder="아이디">
+  <input id="password" type="password" value="Test1234!" placeholder="비밀번호">
+  <button id="btn-login">로그인</button>
+  <div id="status">로그인 전</div>
+</section>
+
+<section>
+  <h2>재화</h2>
+  <div id="balances">-</div>
+  <button id="btn-currency">재화 조회</button>
+</section>
+
+<section>
+  <h2>상점</h2>
+  <table>
+    <thead><tr><th>아이템</th><th>가격</th><th>수량</th><th></th></tr></thead>
+    <tbody id="items"></tbody>
+  </table>
+</section>
+
+<section>
+  <h2>인벤토리</h2>
+  <div id="inventory">-</div>
+  <button id="btn-inventory">인벤토리 조회</button>
+</section>
+
+<section>
+  <h2>요청 로그</h2>
+  <div id="log"></div>
+</section>
+
+<script>
+// 명세 1.4 시드 아이템 (서버에 아이템 목록 API가 없어 명세 값을 그대로 표시)
+const ITEMS = [
+  { item_id: 101, name: "프리미엄 선수팩", currency: "FC", price: 1000 },
+  { item_id: 102, name: "일반 선수팩", currency: "BP", price: 50000 },
+  { item_id: 103, name: "훈련 부스터", currency: "BP", price: 10000 },
+  { item_id: 104, name: "클럽 유니폼 세트", currency: "FC", price: 3000 },
+  { item_id: 105, name: "이벤트 한정팩", currency: "FC", price: 500 },
+];
+
+let token = null;
+let accountId = null;
+
+function log(line) {
+  const el = document.getElementById("log");
+  el.textContent = line + "\n" + el.textContent;
+}
+
+// 같은 출처(페이지를 내려준 서버)로 요청 → 프록시를 거치면 Fiddler에 그대로 잡힌다
+async function api(method, path, body) {
+  const headers = { "Content-Type": "application/json" };
+  if (token) headers["Authorization"] = "Bearer " + token;
+  const res = await fetch(path, { method, headers, body: body ? JSON.stringify(body) : undefined });
+  let data;
+  try { data = await res.json(); } catch (e) { data = null; }
+  log(`${method} ${path} → ${res.status} ${JSON.stringify(data)}`);
+  return { status: res.status, data };
+}
+
+function newRequestId() {
+  return "web-" + Date.now() + "-" + Math.random().toString(16).slice(2, 8);
+}
+
+async function login() {
+  const { status, data } = await api("POST", "/auth/login", {
+    username: document.getElementById("username").value,
+    password: document.getElementById("password").value,
+  });
+  if (status === 200) {
+    token = data.access_token;
+    accountId = data.account_id;
+    document.getElementById("status").textContent = `로그인됨: account_id ${accountId}`;
+    await loadCurrency();
+  } else {
+    document.getElementById("status").textContent = `로그인 실패: ${data && data.error_code}`;
+  }
+}
+
+async function loadCurrency() {
+  if (!token) return log("로그인 먼저");
+  const { status, data } = await api("GET", `/accounts/${accountId}/currency`);
+  if (status === 200) {
+    document.getElementById("balances").textContent = `FC ${data.balances.FC} / BP ${data.balances.BP}`;
+  }
+}
+
+async function loadInventory() {
+  if (!token) return log("로그인 먼저");
+  const { status, data } = await api("GET", `/accounts/${accountId}/inventory`);
+  if (status === 200) {
+    document.getElementById("inventory").textContent =
+      data.items.length ? data.items.map(i => `${i.name} x${i.quantity}`).join(", ") : "비어 있음";
+  }
+}
+
+async function purchase(itemId) {
+  if (!token) return log("로그인 먼저");
+  const quantity = parseInt(document.getElementById(`qty-${itemId}`).value, 10);
+  const { status } = await api("POST", "/shop/purchase", {
+    item_id: itemId, quantity: quantity, request_id: newRequestId(),
+  });
+  if (status === 200) {
+    await loadCurrency();
+    await loadInventory();
+  }
+}
+
+function renderItems() {
+  const tbody = document.getElementById("items");
+  for (const item of ITEMS) {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `<td>${item.name}</td><td>${item.currency} ${item.price}</td>` +
+      `<td><input id="qty-${item.item_id}" type="number" value="1" min="1" style="width:56px"></td>` +
+      `<td><button data-item="${item.item_id}">구매</button></td>`;
+    tbody.appendChild(tr);
+  }
+  tbody.addEventListener("click", e => {
+    if (e.target.dataset.item) purchase(parseInt(e.target.dataset.item, 10));
+  });
+}
+
+document.getElementById("btn-login").addEventListener("click", login);
+document.getElementById("btn-currency").addEventListener("click", loadCurrency);
+document.getElementById("btn-inventory").addEventListener("click", loadInventory);
+renderItems();
+</script>
+</body>
+</html>
