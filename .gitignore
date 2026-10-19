@@ -221,3 +221,7 @@ allure-report/
 # Day 59~ 인계 파일, 봉인 결함 목록
 handoff/
 sealed/
+
+# Day 66~ 로컬 테스트용 인증서·개인키, mitmproxy CA
+day66_certs/
+day66_mitm/
