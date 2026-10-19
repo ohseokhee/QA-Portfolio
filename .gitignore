@@ -225,3 +225,7 @@ sealed/
 # Day 66~ 로컬 테스트용 인증서·개인키, mitmproxy CA
 day66_certs/
 day66_mitm/
+
+# Day 79 다이제스트 발송 상태 (실행 기록)
+day79_digest_state.json
+day79_digest_preview.md
