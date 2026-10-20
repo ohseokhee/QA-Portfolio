@@ -1,8 +1,8 @@
 """day82_fps_measure 파서·계산 단위 테스트 (기기 불필요)"""
 import pytest
 
-from day82_fps_measure import (PENDING, demo_sf_texts, fps_metrics, judge, parse_framestats, parse_gfxinfo,
-                               parse_sf_latency)
+from day82_fps_measure import (PENDING, demo_sf_texts, fps_metrics, hist_intervals, judge, parse_framestats,
+                               parse_gfxinfo, parse_sf_latency, parse_timestats)
 
 VSYNC = 16_666_667
 
@@ -37,6 +37,44 @@ Flags,FrameTimelineVsyncId,IntendedVsync,Vsync,InputEventId,HandleInputStart,Fra
 0,3,1033333334,1033333334,0,1034000000,1043000000,
 ---PROFILEDATA---
 """
+
+
+# LDPlayer(안드로이드 14) --timestats -dump 실제 출력 발췌 (히스토그램은 값이 있는 칸 위주로 줄임)
+TIMESTATS = """displayRefreshRate = 60 fps
+renderRate = 60 fps
+uid = 10047
+layerName = com.android.chrome/ChromeChildSurface#836
+packageName =
+gameMode = Unsupported
+totalFrames = 489
+droppedFrames = 0
+averageFPS = 62.436
+present2present histogram is as below:
+0ms=8 1ms=0 15ms=0 16ms=473 17ms=0 32ms=0 33ms=8 34ms=0 36ms=0
+latch2present histogram is as below:
+0ms=0 5ms=4 6ms=6
+
+displayRefreshRate = 60 fps
+uid = 10047
+layerName = none
+packageName =
+totalFrames = 0
+droppedFrames = 0
+"""
+
+
+def test_fp_10_timestats_layers():
+    layers = parse_timestats(TIMESTATS)
+    assert [x["layer"] for x in layers] == ["com.android.chrome/ChromeChildSurface#836", "none"]
+    chrome = layers[0]
+    assert (chrome["frames"], chrome["dropped"], chrome["avg_fps"]) == (489, 0, 62.436)
+    assert chrome["hist"][16] == 473 and chrome["hist"][33] == 8  # latch2present 줄과 섞이지 않음
+    assert layers[1]["hist"] == {}
+
+
+def test_fp_11_hist_intervals_skip_zero_bucket():
+    intervals = hist_intervals({0: 8, 16: 3, 33: 1})
+    assert intervals == [16, 16, 16, 33]
 
 
 def test_fp_01_sf_latency_skips_zero_and_pending():

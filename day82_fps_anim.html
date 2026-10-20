@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Day 82 FPS 부하 페이지</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #10141c; overflow: hidden; }
+  canvas { display: block; width: 100vw; height: 100vh; }
+  #hud { position: fixed; top: 8px; left: 8px; color: #e8edf5; font: 14px monospace; background: rgba(0,0,0,.5); padding: 4px 8px; }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="hud"></div>
+<script>
+// 측정용 부하 페이지: ?n=입자 수. 매 프레임 입자 n개를 이동·그리기 (외부 요청 없음)
+const n = Number(new URLSearchParams(location.search).get("n") || 300);
+const canvas = document.getElementById("c");
+const ctx = canvas.getContext("2d");
+const hud = document.getElementById("hud");
+let w, h;
+function resize() { w = canvas.width = innerWidth; h = canvas.height = innerHeight; }
+addEventListener("resize", resize);
+resize();
+const ps = Array.from({ length: n }, (_, i) => ({
+  x: Math.random() * w, y: Math.random() * h,
+  vx: Math.cos(i) * 2, vy: Math.sin(i * 1.7) * 2, r: 2 + (i % 6), hue: (i * 37) % 360,
+}));
+let frames = 0, last = performance.now();
+function tick(now) {
+  ctx.fillStyle = "rgba(16,20,28,0.35)";
+  ctx.fillRect(0, 0, w, h);
+  for (const p of ps) {
+    p.x += p.vx; p.y += p.vy;
+    if (p.x < 0 || p.x > w) p.vx *= -1;
+    if (p.y < 0 || p.y > h) p.vy *= -1;
+    ctx.beginPath();
+    ctx.fillStyle = `hsla(${p.hue},80%,60%,0.8)`;
+    ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  frames++;
+  if (now - last >= 1000) {
+    hud.textContent = `n=${n}  ${(frames * 1000 / (now - last)).toFixed(1)} fps`;
+    frames = 0; last = now;
+  }
+  requestAnimationFrame(tick);
+}
+requestAnimationFrame(tick);
+</script>
+</body>
+</html>

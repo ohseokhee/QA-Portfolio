@@ -20,3 +20,5 @@
 - 성능 기준: 기준 기기 실제 플레이 중 평균 55fps, 하위 10% 50fps, 하위 1% 30fps 이상
 - 게임 엔진(Unity 등)은 SurfaceView로 그려서 `gfxinfo`(안드로이드 UI 렌더러 기준)에 프레임이 잡히지 않을 수 있음 → 게임은 SurfaceFlinger `--latency`(레이어 단위 실제 표시 시각), 일반 앱 화면은 `gfxinfo`
 - SurfaceFlinger는 최근 약 128프레임만 보관 → 1초마다 읽어 이어 붙임
+- `--latency`가 0만 돌려주는 환경(LDPlayer 안드로이드 14에서 확인)은 `--timestats`의 레이어별 present2present 히스토그램 사용 (1ms 칸 해상도, 34ms 이후는 2~50ms 칸)
+- 히스토그램 칸 하한값을 간격으로 쓰므로 60Hz 한 프레임(16.7ms)이 16ms로 계산돼 62.5fps로 표시됨 (실제보다 약 4% 높음). 기준 경계 근처(예: 33ms 칸 = 30.3fps)는 원본 히스토그램과 timestats averageFPS를 함께 확인
