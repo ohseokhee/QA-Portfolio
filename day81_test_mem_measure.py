@@ -42,6 +42,31 @@ MEMINFO_OLD = """ App Summary
                TOTAL:    70000       TOTAL SWAP PSS:       40
 """
 
+# LDPlayer(안드로이드 14) 설정 앱 실제 출력 발췌: Summary 힙 PSS는 0, 상세 표 Heap Alloc은 정상, 스왑 표기 "TOTAL SWAP (KB):"
+MEMINFO_EMULATOR = """** MEMINFO in pid 2417 [com.android.settings] **
+                   Pss  Private  Private     Swap      Rss     Heap     Heap     Heap
+                 Total    Dirty    Clean    Dirty    Total     Size    Alloc     Free
+                ------   ------   ------   ------   ------   ------   ------   ------
+  Native Heap        0        0        0        0        0    20040    18258     1781
+  Dalvik Heap        0        0        0        0        0     8361     5467     2894
+ Dalvik Other       16       16        0        0       32                           
+        TOTAL    67294    22692    27200        0   180584    28401    23725     4675
+ 
+ App Summary
+                       Pss(KB)                        Rss(KB)
+                        ------                         ------
+           Java Heap:       72                            224
+         Native Heap:        0                              0
+                Code:    24388                         114428
+               Stack:       60                             68
+            Graphics:        0                              0
+       Private Other:    25372
+              System:    17402
+             Unknown:                                   65864
+ 
+           TOTAL PSS:    67294            TOTAL RSS:   180584      TOTAL SWAP (KB):        0
+"""
+
 STATUS = """Name:\tcom.example.app
 Pid:\t12345
 VmRSS:\t  197420 kB
@@ -58,6 +83,7 @@ def test_mm_01_new_format_summary():
     assert row["swap_pss"] == 120
     assert row["native_heap"] == 41180  # 상세 표의 41236이 아니라 App Summary 값
     assert row["graphics"] == 60412
+    assert (row["native_alloc"], row["dalvik_alloc"]) == (48211, 12288)  # 상세 표 Heap Alloc 열
 
 
 def test_mm_02_old_format_total():
@@ -65,6 +91,13 @@ def test_mm_02_old_format_total():
     assert row["total_pss"] == 70000
     assert row["total_rss"] == 0
     assert row["swap_pss"] == 40
+
+
+def test_mm_09_emulator_android14_format():
+    row = parse_meminfo(MEMINFO_EMULATOR)
+    assert (row["total_pss"], row["total_rss"], row["swap_pss"]) == (67294, 180584, 0)
+    assert row["native_heap"] == 0
+    assert (row["native_alloc"], row["dalvik_alloc"], row["heap_alloc"]) == (18258, 5467, 23725)
 
 
 def test_mm_03_not_running_raises():
@@ -77,8 +110,9 @@ def test_mm_04_anon_plus_swap():
     assert (row["rss_anon"], row["vm_swap"], row["anon_swap"]) == (121500, 310, 121810)
 
 
-def _rows(native_by_label, anon_by_label):
-    return [{"label": label, "total_pss": 0, "graphics": 0, "native_heap": native, "anon_swap": anon_by_label[label]}
+def _rows(native_by_label, anon_by_label, heap_by_label=None):
+    return [{"label": label, "total_pss": 0, "graphics": 0, "native_heap": native, "anon_swap": anon_by_label[label],
+             "heap_alloc": (heap_by_label or {}).get(label, 0)}
             for label, native in native_by_label.items()]
 
 
@@ -94,6 +128,32 @@ def test_mm_06_no_leak_when_returning():
                  {"lobby": 1, "lobby_after1": 1, "lobby_after2": 1})
     _, checks = analyze(rows)
     assert checks[0][1] == "PASS"
+
+
+def test_mm_10_leak_uses_heap_alloc_when_available():
+    # Summary Native Heap은 0(에뮬레이터)이어도 Heap Alloc이 오르면 누수 의심
+    rows = _rows({"lobby": 0, "lobby_after1": 0, "lobby_after2": 0}, {"lobby": 1, "lobby_after1": 1, "lobby_after2": 1},
+                 {"lobby": 100, "lobby_after1": 104, "lobby_after2": 108})
+    _, checks = analyze(rows)
+    assert checks[0][0].endswith("힙 할당량(Native+Dalvik Alloc)") and checks[0][1] == "누수 의심"
+
+
+def test_mm_11_plateau_is_not_leak():
+    # 실측(설정 앱 15회 왕복) 패턴: 초반 증가 후 최근 5회 평탄 → 증가 후 안정
+    vals = [23.3, 34.0, 36.4, 37.9, 39.0, 40.4, 40.5, 41.4, 42.4, 42.1, 41.8, 41.8, 42.2, 42.4, 42.5, 42.5]
+    labels = ["lobby"] + [f"lobby_after{i}" for i in range(1, len(vals))]
+    rows = _rows(dict.fromkeys(labels, 0), dict.fromkeys(labels, 1), dict(zip(labels, vals)))
+    _, checks = analyze(rows)
+    assert checks[0][1] == "증가 후 안정"
+
+
+def test_mm_12_still_rising_is_leak():
+    # 실측(설정 앱 6회 왕복) 패턴: 최근 5회도 계속 증가 → 아직 누수 의심
+    vals = [23.0, 33.8, 35.9, 36.9, 38.0, 38.5, 39.7]
+    labels = ["lobby"] + [f"lobby_after{i}" for i in range(1, len(vals))]
+    rows = _rows(dict.fromkeys(labels, 0), dict.fromkeys(labels, 1), dict(zip(labels, vals)))
+    _, checks = analyze(rows)
+    assert checks[0][1] == "누수 의심"
 
 
 def test_mm_07_background_not_released():
