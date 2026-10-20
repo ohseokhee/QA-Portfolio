@@ -98,7 +98,6 @@
 | [`day76_policy_google_levelup.md`](day76_policy_google_levelup.md) | 구글 플레이 게임즈 레벨업·메모리 기준(2027-02) |
 | [`day77_policy_16kb.md`](day77_policy_16kb.md) | 구글 플레이 16KB 메모리 페이지 크기 |
 | [`day88_test_plan.md`](day88_test_plan.md) | 상점·재화 기능 리스크 기반 테스트 계획서 |
-| [`day84_portfolio_cases.md`](day84_portfolio_cases.md), [`day85_interview_qa.md`](day85_interview_qa.md) | 사례 카드·회사별 제시 순서, 면접 Q&A 20문항 |
 
 ## 8. 기반 실습 (Day 1~58)
 
