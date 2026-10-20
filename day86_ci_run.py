@@ -1,8 +1,9 @@
 """
 Day 86 : API 회귀 테스트 CI 실행기 (GitHub Actions와 로컬 공용)
 - 게이트 1: 서버 v3에 Day 63·64 DB 정합성·동시성 테스트 → 전부 통과해야 함
-- 게이트 2: 서버 v1(결함 시딩)에 같은 테스트 → 시딩 결함 때문에 정해진 수만큼 실패해야 함
-	(테스트가 결함을 계속 잡아내는지 확인. 실패 수가 줄면 테스트가 약해진 것)
+- 게이트 2: 서버 v1(결함 시딩)에 같은 테스트 → 시딩 결함을 계속 잡아내는지 확인 (실패 수가 줄면 테스트가 약해진 것)
+	- Day 63(DB 대조): 결정적 결함이라 매번 3건 실패해야 함
+	- Day 64(동시성): 경쟁 상태라 실행 환경(CPU 수)에 따라 재현 여부가 달라짐 → 최대 3회 반복, 3건 모두 한 번 이상 실패해야 함
 - 게이트 3: DB 없이 도는 단위 테스트 (Day 80 판별 로직)
 - JUnit XML은 ci-results/, 요약은 GITHUB_STEP_SUMMARY(있을 때)와 콘솔에 출력
 실행: py day86_ci_run.py
@@ -21,7 +22,9 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 RESULT_DIR = os.path.join(BASE_DIR, "ci-results")
 DB_TESTS = ["day63_test_db_integrity.py", "day64_test_concurrency.py"]
 UNIT_TESTS = ["day80_test_kbo_lookup.py"]
-V1_EXPECTED_FAILURES = 6  # Day 64 봉인 해제 기준: Day 63 3건 + Day 64 3건
+V1_DB_FAILURES = 3          # Day 64 봉인 해제 기준: Day 63 3건
+V1_CONCURRENCY_FAILURES = 3  # Day 64 3건
+CONCURRENCY_RETRIES = 3
 os.environ["NO_PROXY"] = "127.0.0.1,localhost"
 
 
@@ -74,10 +77,22 @@ def main():
     gates.append(("서버 v3 DB 정합성·동시성", f"{len(v3.passed)} passed, {len(v3.failed)} failed",
                   "실패 0", not v3.failed and v3.passed))
 
-    print("=" * 16, f"[게이트 2] 서버 v1 + Day 63·64 (시딩 결함 {V1_EXPECTED_FAILURES}건 탐지)", "=" * 16)
-    v1 = run("v1_db", DB_TESTS)
-    gates.append(("서버 v1 시딩 결함 탐지", f"{len(v1.passed)} passed, {len(v1.failed)} failed",
-                  f"실패 {V1_EXPECTED_FAILURES}", len(v1.failed) == V1_EXPECTED_FAILURES))
+    print("=" * 16, f"[게이트 2-1] 서버 v1 + Day 63 (결정적 결함 {V1_DB_FAILURES}건 탐지)", "=" * 16)
+    v1 = run("v1_db", DB_TESTS[:1])
+    gates.append(("서버 v1 DB 대조 결함 탐지", f"{len(v1.passed)} passed, {len(v1.failed)} failed",
+                  f"실패 {V1_DB_FAILURES}", len(v1.failed) == V1_DB_FAILURES))
+
+    detected, tries = set(), []
+    for attempt in range(1, CONCURRENCY_RETRIES + 1):
+        print("=" * 16, f"[게이트 2-2] 서버 v1 + Day 64 동시성 ({attempt}/{CONCURRENCY_RETRIES}회차)", "=" * 16)
+        rep = run(f"v1_concurrency_{attempt}", DB_TESTS[1:])
+        detected |= set(rep.failed)
+        tries.append(len(rep.failed))
+        if len(detected) >= V1_CONCURRENCY_FAILURES:
+            break
+    v1.failed += sorted(detected)
+    gates.append(("서버 v1 동시성 결함 탐지", f"회차별 실패 {tries}, 누적 탐지 {len(detected)}건",
+                  f"누적 {V1_CONCURRENCY_FAILURES}건 ({CONCURRENCY_RETRIES}회 안)", len(detected) == V1_CONCURRENCY_FAILURES))
 
     print("=" * 16, "[게이트 3] 단위 테스트 (DB 불필요)", "=" * 16)
     unit = run("unit", UNIT_TESTS)
