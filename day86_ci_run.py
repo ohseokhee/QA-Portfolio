@@ -22,7 +22,7 @@ sys.stdout.reconfigure(encoding="utf-8")
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 RESULT_DIR = os.path.join(BASE_DIR, "ci-results")
 DB_TESTS = ["day63_test_db_integrity.py", "day64_test_concurrency.py"]
-UNIT_TESTS = ["day80_test_kbo_lookup.py", "day81_test_mem_measure.py", "day87_test_gacha.py"]
+UNIT_TESTS = ["day80_test_kbo_lookup.py", "day81_test_mem_measure.py", "day82_test_fps_measure.py", "day87_test_gacha.py"]
 V1_DB_FAILURES = 3          # Day 64 봉인 해제 기준: Day 63 3건
 CONCURRENCY_REQUIRED = {  # 시딩 결함별로 반드시 잡혀야 하는 테스트
     "day64_test_concurrency.py::test_tc_shop_18_overspend": "D5 갱신 손실",
