@@ -189,6 +189,19 @@
 
 ---
 
+## 추가 — 실무 보강 (Day 86~88)
+
+목표 3사 공고에서 자주 보이는 요구(테스트 자동 실행, 확률형 아이템 검증, 테스트 계획 수립)를 기존 실습 결과 위에 덧붙인다.
+
+- Day 86 — GitHub Actions로 push마다 API 회귀 테스트 자동 실행 (v3 전부 통과 + v1 시딩 결함 탐지 유지 확인)
+	- 파일: `.github/workflows/day86_api_regression.yml`, `day86_ci_run.py`
+- Day 87 — 확률형 아이템 공시 확률 검증: 뽑기 로그로 기본 확률(카이제곱 적합도 검정)·천장·10연차 보장 판정, 표본 수 설계
+	- 파일: `day87_gacha.py`, `day87_gacha_verify.py`, `day87_test_gacha.py`, `day87_gacha_qa_checklist.md`
+- Day 88 — [문서] 상점·재화 기능 테스트 계획서: 리스크 기반 우선순위, 진입·종료 기준, Day 59~87 결과를 근거로
+	- 파일: `day88_test_plan.md`
+
+---
+
 ## 병행 — ISTQB CTAL
 
 - KSTQB 공식 홈페이지에서 시험 일정과 응시 조건 확인

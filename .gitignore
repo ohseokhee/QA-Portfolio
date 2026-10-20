@@ -229,3 +229,6 @@ day66_mitm/
 # Day 79 다이제스트 발송 상태 (실행 기록)
 day79_digest_state.json
 day79_digest_preview.md
+
+# Day 86 CI 결과 (JUnit XML)
+ci-results/

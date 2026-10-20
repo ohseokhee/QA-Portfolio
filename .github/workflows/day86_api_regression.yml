@@ -1,0 +1,63 @@
+# Day 86 : push마다 모의 게임 서버 API 회귀 테스트 자동 실행
+# - MariaDB 컨테이너를 띄우고 비밀번호는 실행마다 무작위로 만들어 .env에 기록 (저장소에 비밀값 없음)
+# - day86_ci_run.py: v3 전부 통과 / v1 시딩 결함 6건 탐지 / 단위 테스트 통과를 모두 만족해야 성공
+name: Day 86 API Regression
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  api-regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+          cache: pip
+
+      - name: Install packages
+        run: pip install -r requirements.txt
+
+      - name: Create .env with random DB passwords
+        run: |
+          {
+            echo "MYSQL_ROOT_PASSWORD=$(openssl rand -hex 16)"
+            echo "MARIADB_USER=qa_app"
+            echo "MARIADB_PASSWORD=$(openssl rand -hex 16)"
+            echo "MYSQL_PORT=3307"
+            echo "FC_DB_NAME=fc_qa_lab"
+          } > .env
+
+      - name: Start MariaDB 10.6
+        run: |
+          docker run -d --name qa-mariadb -p 3307:3306 --env-file .env mariadb:10.6
+          python - <<'EOF'
+          import os, time, pymysql
+          from dotenv import load_dotenv
+          load_dotenv(".env")
+          for i in range(60):
+              try:
+                  pymysql.connect(host="127.0.0.1", port=3307, user="root",
+                                  password=os.environ["MYSQL_ROOT_PASSWORD"]).close()
+                  print(f"MariaDB ready after {i * 2}s")
+                  break
+              except pymysql.err.OperationalError:
+                  time.sleep(2)
+          else:
+              raise SystemExit("MariaDB did not start")
+          EOF
+
+      - name: Run API regression gates
+        run: python day86_ci_run.py
+
+      - name: Upload JUnit results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: junit-results
+          path: ci-results/
