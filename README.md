@@ -1,5 +1,7 @@
 # QA-Portfolio
 
+[![Day 86 API Regression](https://github.com/ohseokhee/QA-Portfolio/actions/workflows/day86_api_regression.yml/badge.svg)](https://github.com/ohseokhee/QA-Portfolio/actions/workflows/day86_api_regression.yml)
+
 게임 QA 엔지니어 기술 실습 기록. 모의 게임 서버(상점·재화 API)를 직접 만들고 결함을 심은 뒤, **명세 기반 테스트 → 프록시 변조 → 네트워크 불량 재현 → 수정·회귀**까지 한 사이클을 실행 로그와 수치로 남겼습니다.
 
 > 모든 수치는 각 Day 실행 로그에서 가져왔습니다. 트래픽 캡처·변조·네트워크 조건 실습은 로컬 모의 서버만 대상으로 했습니다.
@@ -13,6 +15,8 @@
 | 네트워크 조건 (Day 69~70) | 타임아웃 후 재시도가 중복 결제를 만드는지 확인한 적 없음 | 지연·패킷 손실·순서 뒤바뀜·일시 끊김 5조건 매트릭스, 서버 v3에 Idempotency-Key + 트랜잭션 | 같은 키 재시도 **4/5 → 5/5 PASS**, DB 정합성·동시성 테스트 **13/13 통과** |
 | 현지화 (Day 73) | 번역 전 UI 깨짐을 미리 찾는 방법 부재 | 의사 현지화 페이지 자동 생성 + Selenium 넘침·줄바꿈 탐지 | 모바일 360px에서 **줄바꿈 10건** 자동 탐지 (원본 0건) |
 | 도구 공개판 (Day 78~80) | 회사에서 만든 도구를 외부에 보여줄 수 없음 | 사내 연동을 빼고 공개 데이터·서비스로 재구성 | 마켓 소식 다이제스트·스케줄러, KBO 선수 조회(판별 테스트 **17/17 통과**) |
+| CI (Day 86) | 테스트를 고치다 탐지력이 떨어져도 모름 | GitHub Actions에서 최신 서버 통과 + 결함 시딩 서버 탐지 유지를 함께 게이트로 | push마다 v3 **13/13 통과**, v1 시딩 결함 **6건 탐지 유지** |
+| 확률형 아이템 (Day 87) | "많이 뽑아 보면 안다"는 감으로 확률 검증 | 뽑기 로그로 카이제곱 적합도 검정·천장 규칙 검증, 필요 표본 수 계산 | 결함 빌드: 천장 오류는 1,000회부터, 확률 오류(1.5%→1.2%)는 100,000회에서 FAIL (필요 약 **32,000회**) |
 
 ## 1. 모의 게임 서버 + API 테스트 (Day 59~64)
 
@@ -69,7 +73,29 @@
 - 공개판 원칙: 사내 URL·시트·메신저·계정 제거, 공개 데이터와 공개 서비스만 사용, 외부 요청 최소 1초 간격, 비밀값은 `.env`
 - KBO 공식 홈페이지는 robots.txt가 자동 수집을 금지해 사용하지 않았습니다
 
-## 6. 기반 실습 (Day 1~58)
+## 6. CI·확률형 아이템 (Day 86~87)
+
+- **CI (Day 86)**: [`.github/workflows/day86_api_regression.yml`](.github/workflows/day86_api_regression.yml), [`day86_ci_run.py`](day86_ci_run.py)
+	- MariaDB 컨테이너 비밀번호를 실행마다 무작위로 만들어 `.env`에 기록 (저장소에 비밀값 없음)
+	- 게이트: 서버 v3 DB 정합성·동시성 전부 통과 / 서버 v1 시딩 결함 탐지 유지 / 단위 테스트
+	- GitHub 러너(2코어)에서는 동시성 결함이 회차마다 1~3건만 재현됨 → 결정적 결함(매번 탐지)과 동시성 결함(반복 누적 탐지)을 게이트에서 분리
+- **확률형 아이템 (Day 87)**: [`day87_gacha_report.md`](day87_gacha_report.md), [`day87_gacha_qa_checklist.md`](day87_gacha_qa_checklist.md)
+	- 공시 SSR 1.5%·천장 80회·10연차 SR 보장 규칙을 뽑기 로그만으로 판정. 확정 뽑기를 뺀 일반 뽑기만 카이제곱 검정
+	- 결함 빌드(v1: SSR 가중치 1.2%, 천장 81회): 천장은 1,000회부터 FAIL, 기본 확률은 10,000회까지 PASS(99% 구간 1.015%~1.605%에 1.5% 포함) → 100,000회에서 FAIL
+
+## 7. 문서 산출물
+
+| 문서 | 내용 |
+|---|---|
+| [`day71_bug_reports_en.md`](day71_bug_reports_en.md) | 실측 결함 기반 영어 버그 리포트 3건 (Critical 1, Major 2) |
+| [`day74_policy_onestore_unity.md`](day74_policy_onestore_unity.md) | Unity 런타임 취약점 CVE-2025-59489 대응 |
+| [`day75_policy_apple_age.md`](day75_policy_apple_age.md) | 애플 연령 등급 개편(13+·16+·18+)과 연령 확인 |
+| [`day76_policy_google_levelup.md`](day76_policy_google_levelup.md) | 구글 플레이 게임즈 레벨업·메모리 기준(2027-02) |
+| [`day77_policy_16kb.md`](day77_policy_16kb.md) | 구글 플레이 16KB 메모리 페이지 크기 |
+| [`day88_test_plan.md`](day88_test_plan.md) | 상점·재화 기능 리스크 기반 테스트 계획서 |
+| [`day84_portfolio_cases.md`](day84_portfolio_cases.md), [`day85_interview_qa.md`](day85_interview_qa.md) | 사례 카드·회사별 제시 순서, 면접 Q&A 20문항 |
+
+## 8. 기반 실습 (Day 1~58)
 
 | 구간 | 내용 |
 |---|---|
@@ -85,7 +111,7 @@
 - API 테스트: Postman, Newman (htmlextra)
 - 서버·DB: FastAPI, Uvicorn, MariaDB (Docker)
 - 프록시·네트워크: Fiddler Classic, mitmproxy (애드온으로 변조·응답 조작·네트워크 조건 자동화)
-- 인프라: Docker Compose, AWS (EC2, RDS, S3, CloudFront)
+- 인프라·CI: Docker Compose, GitHub Actions, AWS (EC2, RDS, S3, CloudFront)
 
 ## 실행 방법 (Day 59~)
 
@@ -103,6 +129,8 @@ py -m pytest day63_test_db_integrity.py day64_test_concurrency.py
 py day67_tamper_test.py             # 프록시 요청 변조 (mitmproxy)
 py day70_compare.py                 # 네트워크 매트릭스 v2/v3 비교
 py day73_pseudo_loc.py              # 의사 현지화 점검
+py day86_ci_run.py                  # CI 게이트 로컬 실행
+py day87_gacha_verify.py            # 확률형 아이템 검증
 ```
 
 - `.env` 필요 항목: `MYSQL_ROOT_PASSWORD`, `MARIADB_USER`, `MARIADB_PASSWORD`, `MYSQL_PORT`, `FC_DB_NAME` (선택: `DISCORD_WEBHOOK_URL`)
