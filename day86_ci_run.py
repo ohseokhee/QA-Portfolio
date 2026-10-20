@@ -3,7 +3,8 @@ Day 86 : API 회귀 테스트 CI 실행기 (GitHub Actions와 로컬 공용)
 - 게이트 1: 서버 v3에 Day 63·64 DB 정합성·동시성 테스트 → 전부 통과해야 함
 - 게이트 2: 서버 v1(결함 시딩)에 같은 테스트 → 시딩 결함을 계속 잡아내는지 확인 (실패 수가 줄면 테스트가 약해진 것)
 	- Day 63(DB 대조): 결정적 결함이라 매번 3건 실패해야 함
-	- Day 64(동시성): 경쟁 상태라 실행 환경(CPU 수)에 따라 재현 여부가 달라짐 → 최대 10회 반복, 3건 모두 한 번 이상 실패해야 함
+	- Day 64(동시성): 경쟁 상태라 실행 환경(CPU 수)에 따라 재현 여부가 달라짐 → 최대 10회 반복,
+	  시딩 결함 D5(갱신 손실)·D6(중복 지급)을 잡는 DB 검증 테스트가 각각 한 번 이상 실패해야 함 (응답 검증 테스트는 참고)
 - 게이트 3: DB 없이 도는 단위 테스트 (Day 80 판별 로직, Day 87 확률 검증)
 - JUnit XML은 ci-results/, 요약은 GITHUB_STEP_SUMMARY(있을 때)와 콘솔에 출력
 실행: py day86_ci_run.py
@@ -23,8 +24,11 @@ RESULT_DIR = os.path.join(BASE_DIR, "ci-results")
 DB_TESTS = ["day63_test_db_integrity.py", "day64_test_concurrency.py"]
 UNIT_TESTS = ["day80_test_kbo_lookup.py", "day87_test_gacha.py"]
 V1_DB_FAILURES = 3          # Day 64 봉인 해제 기준: Day 63 3건
-V1_CONCURRENCY_FAILURES = 3  # Day 64 3건
-CONCURRENCY_RETRIES = 10  # GitHub 러너(2코어)에서 회차당 탐지 1~3건으로 들쭉날쭉 → 넉넉히 반복, 다 잡히면 즉시 중단
+CONCURRENCY_REQUIRED = {  # 시딩 결함별로 반드시 잡혀야 하는 테스트
+    "day64_test_concurrency.py::test_tc_shop_18_overspend": "D5 갱신 손실",
+    "day64_test_concurrency.py::test_tc_shop_17_same_request_id_db": "D6 중복 지급",
+}
+CONCURRENCY_RETRIES = 10  # GitHub 러너(2코어)에서 회차당 탐지 1~2건으로 들쭉날쭉 → 넉넉히 반복, 다 잡히면 즉시 중단
 os.environ["NO_PROXY"] = "127.0.0.1,localhost"
 
 
@@ -88,11 +92,13 @@ def main():
         rep = run(f"v1_concurrency_{attempt}", DB_TESTS[1:])
         detected |= set(rep.failed)
         tries.append(len(rep.failed))
-        if len(detected) >= V1_CONCURRENCY_FAILURES:
+        if set(CONCURRENCY_REQUIRED) <= detected:
             break
     v1.failed += sorted(detected)
-    gates.append(("서버 v1 동시성 결함 탐지", f"회차별 실패 {tries}, 누적 탐지 {len(detected)}건",
-                  f"누적 {V1_CONCURRENCY_FAILURES}건 ({CONCURRENCY_RETRIES}회 안)", len(detected) == V1_CONCURRENCY_FAILURES))
+    missing = [d for t, d in CONCURRENCY_REQUIRED.items() if t not in detected]
+    gates.append(("서버 v1 동시성 결함 탐지", f"회차별 실패 {tries}, 누적 탐지 {len(detected)}건"
+                  + (f", 미탐지 {missing}" if missing else ""),
+                  f"D5·D6 각 1회 이상 ({CONCURRENCY_RETRIES}회 안)", not missing))
 
     print("=" * 16, "[게이트 3] 단위 테스트 (DB 불필요)", "=" * 16)
     unit = run("unit", UNIT_TESTS)
