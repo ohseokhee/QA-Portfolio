@@ -1,8 +1,8 @@
 # QA-Portfolio 프로젝트 규칙
 
 ## 커리큘럼 현황
-- 완료: Day 1~71, 73~80, 83~88
-- 다음: 없음 / 보류: Day 81·82 (LDPlayer ADB 디버깅 켜기 필요), Day 72 (에픽세븐 관찰은 사용자 직접)
+- 완료: Day 1~80, 83~88
+- 다음: Day 81
 - 커리큘럼 파일: `curriculum_v3_day59_85.md` (이 파일만 참조)
 - `archive/` 폴더는 지난 커리큘럼 보관용. 읽거나 참조하지 말 것
 - 최초 1회: 루트에 `curriculum_v2_day51_75.md`가 있으면 `git mv`로 `archive/`에 옮기고 Day 59 커밋에 포함
