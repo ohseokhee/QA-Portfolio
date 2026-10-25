@@ -31,6 +31,7 @@
 | E | 74~77 | 마켓 정책 대응 아카이브 | 강점의 가시화 | 전체 |
 | F | 78~82 | 사내 도구 공개판 | 회사 코드 비공개 문제 | 전체 |
 | G | 83~85 | 정리·면접 대비 | - | 전체 |
+| H | 89~91 | 현지화 검수 확장 | 글로벌 서비스 경험 없음 (자동 점검으로 보강) | 스마일게이트, EA |
 | 병행 | - | ISTQB CTAL | 상위 자격 | 전체 |
 
 ---
@@ -199,6 +200,45 @@
 	- 파일: `day87_gacha.py`, `day87_gacha_verify.py`, `day87_test_gacha.py`, `day87_gacha_qa_checklist.md`
 - Day 88 — [문서] 상점·재화 기능 테스트 계획서: 리스크 기반 우선순위, 진입·종료 기준, Day 59~87 결과를 근거로
 	- 파일: `day88_test_plan.md`
+
+## Phase H — 현지화 검수 확장 (Day 89~91)
+
+배경: Day 72 LQA 체크리스트(LQA-01~09)와 Day 73 의사 현지화를 실제 리소스 파일, 로캘 형식, 공개 스토어 등록정보 점검으로 넓힌다. 사용자가 할 일 없이 끝까지 자동으로 진행되는 범위만 다룬다. 실무 LQA 경험이 아니라 개인 실습으로 표기한다.
+
+### Day 89 — 다국어 문자열 리소스 LQA 자동 점검
+- 모의 상점 화면 문자열(명세 1.4 아이템 이름과 상태 문구, Day 73 변환 대상)을 기준어 한국어 + en, ja, zh-TW, th, es 리소스 JSON으로 구성하고 용어집 CSV 작성
+	- 번역문은 연습용으로 만든 데이터. 리포트 머리에 명시
+- 생성 스크립트가 고정 seed로 LQA 결함 10~12개를 주입, 정답표는 `sealed/day89_answer_key.json`
+- 점검 규칙 (각 규칙을 LQA-01~09에 매핑)
+	1. 키 누락과 문자열 ID 노출
+	2. 미번역 (원문과 같음, 허용 목록 FC·BP 등 제외)
+	3. 자리표시자와 태그 불일치 (`{count}`, `{item}`, Unity TextMeshPro 리치 텍스트 `<color>`, `<b>`)
+	4. 숫자와 % 불일치 (원문 수치와 번역 수치 대조, Day 72 "수치와 효과는 데이터와 대조")
+	5. 용어집 위반 (정해진 번역 누락, 금지 번역 사용)
+	6. 길이 예산 초과 (키별 최대 폭, 전각 문자 2칸, 태국어 결합 문자 0칸으로 추정)
+	7. 문자 체계 혼입 (ja에 한글, zh-TW에 간체 빈출 글자, th에 번역 없이 라틴 문자만)
+	8. 문장 부호와 공백 (전각과 반각 혼용, 스페인어 ¿ ¡ 누락, 이중 공백, 앞뒤 공백)
+	9. 같은 원문 다른 번역 (일관성)
+- 결과: 언어 × 규칙 매트릭스 리포트(md, csv), 정답표 대조 정밀도·재현율, 규칙별 pytest
+	- 정밀도: 잡아낸 것 중 실제 결함 비율 / 재현율: 실제 결함 중 잡아낸 비율
+- 파일: `day89_make_strings.py`, `day89_lqa_lint.py`, `day89_test_lqa_lint.py`, `day89_strings/`, `day89_glossary.csv`, `day89_lqa_report.md`
+
+### Day 90 — 로캘 형식, 시간대, 폰트 글리프 점검
+- Babel(CLDR)로 ko_KR, en_US, ja_JP, zh_TW, th_TH, es_ES, de_DE의 숫자, 통화, 날짜 표기 기준표 생성 → Day 89 문자열과 상점 화면의 하드코딩 형식(`1,000`, `2026-10-25 05:00`) 탐지
+- zoneinfo(Windows는 `tzdata` 패키지 필요)로 KST 기준 이벤트 일정(일일 초기화 05:00, 이벤트 종료 시각)을 지역 시간으로 변환하고 서머타임 경계 검증
+	- 2026-10-25 유럽 서머타임 종료, 2026-11-01 미국 서머타임 종료: 같은 KST 05:00 초기화가 현지 시각으로 1시간 바뀌는지, 현지 시각 기준 일정에서 중복되거나 없는 시각(fold) 처리
+- fontTools로 Windows 기본 폰트(맑은 고딕, Yu Gothic 또는 Meiryo, Microsoft JhengHei, Leelawadee UI, Segoe UI)의 글리프 보유 여부를 언어별 문자열로 점검 → 빠진 글자(두부 □) 목록과 폴백 폰트 필요 여부
+	- 폰트는 파일명 대신 패밀리 이름으로 찾고 읽기만 함 (복사·커밋 금지)
+	- pytest는 fontTools FontBuilder로 만든 작은 테스트 폰트로 (기기와 OS에 상관없이 재현)
+- 파일: `day90_locale_check.py`, `day90_test_locale_check.py`, `day90_locale_report.md`
+
+### Day 91 — App Store 공개 등록정보 다국어 점검
+- Apple 공개 iTunes Search/Lookup API로 게임 3종의 국가별 스토어(kr, us, jp, tw, th, es) 등록정보 수집
+	- 대상: 에픽세븐(스마일게이트, Day 72와 연결), EA SPORTS FC Mobile(EA), 세븐나이츠 리버스(넷마블). 검색으로 찾은 trackId를 리포트에 기록
+- 점검: 국가별 출시 여부, 버전과 출시일 차이(단계 출시), 릴리스 노트 문자 체계와 스토어 언어 일치, 지원 언어 목록(languageCodesISO2A), 연령 등급(contentAdvisoryRating, Day 75 연결), 가격 표기(formattedPrice)와 통화, 최소 OS
+- 요청 간격 3초 이상, 응답 JSON은 `day91_fixtures/`에 저장, 판정 로직 pytest는 저장본으로
+- 구글 플레이는 공개 API가 없어 제외 (페이지 크롤링 하지 않음)
+- 파일: `day91_store_listing_check.py`, `day91_test_store_listing.py`, `day91_fixtures/`, `day91_store_report.md`
 
 ---
 
