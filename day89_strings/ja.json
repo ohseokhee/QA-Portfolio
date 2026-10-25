@@ -1,0 +1,33 @@
+{
+  "_meta": {
+    "lang": "ja",
+    "note": "연습용으로 만든 번역 데이터 (실제 게임 번역 아님)"
+  },
+  "shop.title": "模擬ゲームショップ",
+  "btn.login": "ログイン",
+  "btn.currency": "通貨を確認",
+  "btn.inventory": "インベントリを見る",
+  "btn.buy": "購入",
+  "dialog.buy.ok": "購入",
+  "menu.buy": "購入",
+  "table.item": "アイテム",
+  "table.price": "価格",
+  "table.qty": "数量",
+  "status.logged_in": "ログイン中：{account_id}",
+  "status.login_failed": "ログイン失敗：{error_code}",
+  "status.empty": "なし",
+  "status.need_login": "先にログインしてください",
+  "item.101.name": "プレミアム選手パック",
+  "item.102.name": "通常選手パック",
+  "item.103.name": "トレーニングブースター",
+  "item.104.name": "クラブユニフォームセット",
+  "item.105.name": "イベント限定パック",
+  "item.103.desc": "トレーニング効果<color=#FFD700>20%</color>アップ（35分）",
+  "msg.buy_confirm": "{item}を{count}個購入しますか？",
+  "msg.buy_done": "{item}を{count}個購入しました！",
+  "msg.insufficient": "{currency}が不足しています。",
+  "msg.limit": "<b>所持上限</b>の999個を超えることはできません。",
+  "msg.max_per_buy": "一度に最大10個まで購入できます。",
+  "msg.event_ended": "イベント販売は終了しました。",
+  "msg.inventory_title": "インベントリ"
+}

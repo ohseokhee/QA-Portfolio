@@ -1,0 +1,11 @@
+lang,key,rule,detail
+en,btn.inventory,R2,원문 그대로: '인벤토리 조회'
+en,item.102.name,R5,'선수팩' 금지 번역 'Player Card Pack' 사용
+en,dialog.buy.ok,R9,'구매' 다수 번역 'Buy'와 다름: 'Purchase'
+ja,item.103.desc,R4,"원문 ['20', '30'] / 번역 ['20', '35']"
+zh-TW,status.login_failed,R8,앞뒤 공백
+zh-TW,msg.buy_confirm,R3,"원문 ['{count}', '{item}'] / 번역 ['{counx}', '{item}']"
+zh-TW,msg.max_per_buy,R7,번체에 간체 글자: 购
+th,dialog.buy.ok,R6,폭 37 > 예산 12
+es,msg.buy_done,R1,키 누락
+es,msg.inventory_title,R5,'인벤토리' 금지 번역 'mochila' 사용

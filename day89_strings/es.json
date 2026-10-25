@@ -1,0 +1,32 @@
+{
+  "_meta": {
+    "lang": "es",
+    "note": "연습용으로 만든 번역 데이터 (실제 게임 번역 아님)"
+  },
+  "shop.title": "Tienda de juego simulada",
+  "btn.login": "Iniciar sesión",
+  "btn.currency": "Consultar moneda",
+  "btn.inventory": "Ver inventario",
+  "btn.buy": "Comprar",
+  "dialog.buy.ok": "Comprar",
+  "menu.buy": "Comprar",
+  "table.item": "Objeto",
+  "table.price": "Precio",
+  "table.qty": "Cantidad",
+  "status.logged_in": "Sesión iniciada: {account_id}",
+  "status.login_failed": "Error al iniciar sesión: {error_code}",
+  "status.empty": "Vacío",
+  "status.need_login": "Inicia sesión primero",
+  "item.101.name": "Sobre de jugadores prémium",
+  "item.102.name": "Sobre de jugadores estándar",
+  "item.103.name": "Potenciador de entrenamiento",
+  "item.104.name": "Conjunto de uniforme del club",
+  "item.105.name": "Sobre limitado del evento",
+  "item.103.desc": "Efecto de entrenamiento +<color=#FFD700>20%</color> (30 min)",
+  "msg.buy_confirm": "¿Comprar {count} de {item}?",
+  "msg.insufficient": "No tienes suficiente {currency}.",
+  "msg.limit": "No puedes superar el <b>límite de posesión</b> de 999.",
+  "msg.max_per_buy": "Puedes comprar hasta 10 a la vez.",
+  "msg.event_ended": "La venta del evento ha terminado.",
+  "msg.inventory_title": "mochila"
+}

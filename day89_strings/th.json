@@ -1,0 +1,33 @@
+{
+  "_meta": {
+    "lang": "th",
+    "note": "연습용으로 만든 번역 데이터 (실제 게임 번역 아님)"
+  },
+  "shop.title": "ร้านค้าเกมจำลอง",
+  "btn.login": "เข้าสู่ระบบ",
+  "btn.currency": "ตรวจสอบสกุลเงิน",
+  "btn.inventory": "ดูคลังไอเทม",
+  "btn.buy": "ซื้อ",
+  "dialog.buy.ok": "ซื้อ (แตะที่นี่เพื่อดูรายละเอียดทั้งหมดของไอเทมนี้)",
+  "menu.buy": "ซื้อ",
+  "table.item": "ไอเทม",
+  "table.price": "ราคา",
+  "table.qty": "จำนวน",
+  "status.logged_in": "เข้าสู่ระบบแล้ว: {account_id}",
+  "status.login_failed": "เข้าสู่ระบบไม่สำเร็จ: {error_code}",
+  "status.empty": "ว่างเปล่า",
+  "status.need_login": "กรุณาเข้าสู่ระบบก่อน",
+  "item.101.name": "แพ็กนักเตะพรีเมียม",
+  "item.102.name": "แพ็กนักเตะทั่วไป",
+  "item.103.name": "บูสเตอร์ฝึกซ้อม",
+  "item.104.name": "ชุดยูนิฟอร์มสโมสร",
+  "item.105.name": "แพ็กลิมิเต็ดอีเวนต์",
+  "item.103.desc": "เอฟเฟกต์การฝึกเพิ่มขึ้น <color=#FFD700>20%</color> (30 นาที)",
+  "msg.buy_confirm": "ต้องการซื้อ {item} จำนวน {count} ชิ้นหรือไม่",
+  "msg.buy_done": "ซื้อ {item} จำนวน {count} ชิ้นสำเร็จ!",
+  "msg.insufficient": "{currency} ไม่เพียงพอ",
+  "msg.limit": "ไม่สามารถเกิน<b>ขีดจำกัดการถือครอง</b> 999 ชิ้นได้",
+  "msg.max_per_buy": "ซื้อได้สูงสุดครั้งละ 10 ชิ้น",
+  "msg.event_ended": "การขายในอีเวนต์สิ้นสุดแล้ว",
+  "msg.inventory_title": "คลังไอเทม"
+}

@@ -1,0 +1,33 @@
+{
+  "_meta": {
+    "lang": "zh-TW",
+    "note": "연습용으로 만든 번역 데이터 (실제 게임 번역 아님)"
+  },
+  "shop.title": "模擬遊戲商店",
+  "btn.login": "登入",
+  "btn.currency": "查詢貨幣",
+  "btn.inventory": "查看背包",
+  "btn.buy": "購買",
+  "dialog.buy.ok": "購買",
+  "menu.buy": "購買",
+  "table.item": "道具",
+  "table.price": "價格",
+  "table.qty": "數量",
+  "status.logged_in": "已登入：{account_id}",
+  "status.login_failed": "登入失敗：{error_code} ",
+  "status.empty": "空",
+  "status.need_login": "請先登入",
+  "item.101.name": "高級球員包",
+  "item.102.name": "一般球員包",
+  "item.103.name": "訓練加速器",
+  "item.104.name": "俱樂部球衣組",
+  "item.105.name": "活動限定包",
+  "item.103.desc": "訓練效果提升<color=#FFD700>20%</color>（30分鐘）",
+  "msg.buy_confirm": "確定購買{counx}個{item}嗎？",
+  "msg.buy_done": "已購買{count}個{item}！",
+  "msg.insufficient": "{currency}不足。",
+  "msg.limit": "無法超過<b>持有上限</b>999個。",
+  "msg.max_per_buy": "每次最多可购買10個。",
+  "msg.event_ended": "活動販售已結束。",
+  "msg.inventory_title": "背包"
+}

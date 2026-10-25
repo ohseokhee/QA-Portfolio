@@ -1,0 +1,33 @@
+{
+  "_meta": {
+    "lang": "en",
+    "note": "연습용으로 만든 번역 데이터 (실제 게임 번역 아님)"
+  },
+  "shop.title": "Mock Game Shop",
+  "btn.login": "Log In",
+  "btn.currency": "Check Currency",
+  "btn.inventory": "인벤토리 조회",
+  "btn.buy": "Buy",
+  "dialog.buy.ok": "Purchase",
+  "menu.buy": "Buy",
+  "table.item": "Item",
+  "table.price": "Price",
+  "table.qty": "Qty",
+  "status.logged_in": "Logged in: {account_id}",
+  "status.login_failed": "Login failed: {error_code}",
+  "status.empty": "Empty",
+  "status.need_login": "Please log in first",
+  "item.101.name": "Premium Player Pack",
+  "item.102.name": "Standard Player Card Pack",
+  "item.103.name": "Training Booster",
+  "item.104.name": "Club Uniform Set",
+  "item.105.name": "Limited Event Pack",
+  "item.103.desc": "Training effect +<color=#FFD700>20%</color> (30 min)",
+  "msg.buy_confirm": "Buy {count} of {item}?",
+  "msg.buy_done": "Purchased {count} of {item}!",
+  "msg.insufficient": "Not enough {currency}.",
+  "msg.limit": "Cannot exceed the <b>holding limit</b> of 999.",
+  "msg.max_per_buy": "You can buy up to 10 at a time.",
+  "msg.event_ended": "Event sales have ended.",
+  "msg.inventory_title": "Inventory"
+}

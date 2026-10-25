@@ -1,0 +1,33 @@
+{
+  "_meta": {
+    "lang": "ko",
+    "note": "연습용으로 만든 번역 데이터 (실제 게임 번역 아님)"
+  },
+  "shop.title": "모의 게임 상점",
+  "btn.login": "로그인",
+  "btn.currency": "재화 조회",
+  "btn.inventory": "인벤토리 조회",
+  "btn.buy": "구매",
+  "dialog.buy.ok": "구매",
+  "menu.buy": "구매",
+  "table.item": "아이템",
+  "table.price": "가격",
+  "table.qty": "수량",
+  "status.logged_in": "로그인됨: {account_id}",
+  "status.login_failed": "로그인 실패: {error_code}",
+  "status.empty": "비어 있음",
+  "status.need_login": "먼저 로그인하세요",
+  "item.101.name": "프리미엄 선수팩",
+  "item.102.name": "일반 선수팩",
+  "item.103.name": "훈련 부스터",
+  "item.104.name": "클럽 유니폼 세트",
+  "item.105.name": "이벤트 한정팩",
+  "item.103.desc": "훈련 효과 <color=#FFD700>20%</color> 증가 (30분)",
+  "msg.buy_confirm": "{item}을(를) {count}개 구매하시겠습니까?",
+  "msg.buy_done": "{item} {count}개 구매 완료!",
+  "msg.insufficient": "{currency}이(가) 부족합니다.",
+  "msg.limit": "<b>보유 상한</b> 999개를 넘을 수 없습니다.",
+  "msg.max_per_buy": "한 번에 최대 10개까지 구매할 수 있습니다.",
+  "msg.event_ended": "이벤트 판매가 종료되었습니다.",
+  "msg.inventory_title": "인벤토리"
+}
