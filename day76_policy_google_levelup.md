@@ -20,7 +20,7 @@
 | | 입력 (LU-IC-GAA) | 컨트롤러 또는 키보드·마우스로 전부 플레이 가능 |
 | | PC (LU-PC-GAA) | Google Play Games on PC 배포 |
 | 안정성·부드러운 플레이 | 안정성 (LU-ST-GAA/GAB) | 최근 28일, 크래시율 테스트 기기 1% 미만·4GB+ 기기 2% 미만 / ANR율 2% 미만·3% 미만 |
-| | 성능 (LU-PR-GAA) | 기준 기기 실제 플레이 중 **평균 55fps 이상, 하위 10%(P90) 50fps 이상, 하위 1%(P99) 30fps 이상** |
+| | 성능 (LU-PR-GAA) | 기준 기기 실제 플레이 중 **평균 55fps 이상, 하위 10% 50fps 이상, 하위 1% 30fps 이상** |
 | | 메모리 (LU-MM-GAA) | 아래 메모리 기준 충족 (2027-02 적용) |
 | | Vulkan (LU-VK-GAA) | 조건 충족 기기에서 Unity 2023+·Unreal 4.25+는 Vulkan 기본, OpenGL ES 프레임 10% 미만 |
 
@@ -33,6 +33,18 @@
 
 - 기준을 넘으면 "구글 플레이 노출과 게시 기능이 제한될 수 있음" (자동 삭제는 아님)
 - 구체 임계값은 Play Console 고객센터 문서에 기기 RAM 구간별로 제시
+- RAM 구간별 메모리 기준 (게임, 익명 RSS + 스왑의 최근 28일 90번째 백분위, 2027년 2월부터 휴대전화와 태블릿, 2026-10-25 고객센터 문서 확인)
+
+| RAM 구간 | 총 메모리 범위 | 포그라운드 | 사용자 인식 서비스 | 백그라운드 |
+|---|---|---|---|---|
+| 4GB | 3,200MB 이상 4,800MB 미만 | 2.25GB | 2.0GB | 2.0GB |
+| 6GB | 4,800MB 이상 6,800MB 미만 | 2.75GB | 2.5GB | 2.5GB |
+| 8GB | 6,800MB 이상 9,216MB 미만 | 3.5GB | 2.75GB | 2.75GB |
+| 12GB | 9,216MB 이상 14,336MB 미만 | 4.0GB | 3.2GB | 3.2GB |
+| 16GB | 14,336MB 이상 18,432MB 미만 | 5.0GB | 3.5GB | 3.5GB |
+
+- 비트맵 메모리 (앱, 게임 공통): 사용자 인식 서비스와 백그라운드 200MB, 캐시 400MB
+- 코드 최적화: DEX 코드가 50MB를 넘는 게임은 최적화, 난독화, 축소 비율 각각 25% 이상
 - Play Console Android vitals에 동적 메모리·비트맵 지표(백분위·RAM 구간별)와 메모리 부족 종료 필터 추가
 
 ### 1-3. 배경: 안드로이드 17 앱별 메모리 한도
@@ -92,3 +104,4 @@
 2. Android Developers Blog, Elevating app quality: Reducing memory usage and improving device migration (2026-08-26): https://developer.android.com/blog/posts/elevating-app-quality-reducing-memory-usage-and-improving-device-migration
 3. Android Developers Blog, Preparing your app for broader memory limits (2026-08-19): https://developer.android.com/blog/posts/preparing-your-app-for-broader-memory-limits
 4. Google Play Console, Level Up 프로그램 소개: https://play.google.com/console/about/levelup
+5. Play Console 고객센터, Play Console 기술 품질 요구사항 (2026-10-25 확인): https://support.google.com/googleplay/android-developer/answer/17492799?hl=ko
