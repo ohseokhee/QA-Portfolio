@@ -235,3 +235,7 @@ ci-results/
 
 # 개인 경력 원본 자료 (공개 저장소에 올리지 않음)
 game_qa_automation_context.md
+
+# 노션 백업, 추출본 (Notion 원문 사본)
+backup/
+notion_export/
