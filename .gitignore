@@ -239,3 +239,8 @@ game_qa_automation_context.md
 # 노션 백업, 추출본 (Notion 원문 사본)
 backup/
 notion_export/
+
+# 로컬 전용 (작업 규칙, 작업 지시서, 개인 준비 자료)
+CLAUDE.md
+tasks/
+private/
