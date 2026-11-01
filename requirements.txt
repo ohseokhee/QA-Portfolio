@@ -11,3 +11,6 @@ requests
 mitmproxy
 pytest-html
 matplotlib
+Babel
+tzdata
+fonttools
